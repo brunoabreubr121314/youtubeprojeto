@@ -100,7 +100,11 @@ h1{font-family:var(--f-display);font-weight:800;font-size:clamp(28px,4vw,40px);l
 .next .when em{display:block;font-style:normal;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 .next .tt{font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .next.none .tt{color:var(--muted);font-weight:500}
-.qhead{background:none;border:0;padding:0;text-align:left;width:100%}
+.qlink{color:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:4px}
+.qlink svg{color:var(--muted)}
+.qlink:hover{text-decoration:underline;text-decoration-color:var(--c);text-underline-offset:3px}
+.eye{margin-left:2px;width:28px;height:28px;border-radius:7px;border:0;background:transparent;color:var(--muted);display:grid;place-items:center;padding:0;flex:none}
+.eye:hover{background:var(--sunk);color:var(--fg)}
 .nextwrap{background:var(--sunk);border-radius:8px;overflow:hidden}
 .next{width:100%;border:0;background:transparent;text-align:left}
 .next:hover{background:var(--line)}
@@ -253,6 +257,7 @@ input[type=text],input[type=date],input[type=time],select{border:1px solid var(-
         <label for="chColab">Colaborador<select id="chColab"></select></label>
       </div>
       <label for="chColabNovo" id="chColabNovoWrap" hidden>Nome do novo colaborador<input type="text" id="chColabNovo" maxlength="40" placeholder="Ex.: Ana Souza"></label>
+      <label for="chLink"><span>Link do canal <span style="font-weight:400">(opcional)</span></span><input type="text" id="chLink" inputmode="url" maxlength="300" placeholder="Ex.: https://www.youtube.com/@wealthmind"></label>
       <div><span class="lab">Cor</span><div class="sw" id="chCores"></div></div>
       <p class="err" id="chErr" hidden></p>
       <div class="actions">
@@ -273,7 +278,7 @@ input[type=text],input[type=date],input[type=time],select{border:1px solid var(-
         <button class="nav" id="next" aria-label="Próximo mês">›</button>
       </div>
       <div class="grid" id="grid"></div>
-      <p class="legend" style="margin-top:10px">Clique num dia para ver e programar. Arraste um tema para outro dia para reagendar. Clique num canal acima para mostrar ou esconder.</p>
+      <p class="legend" style="margin-top:10px">Clique num dia para ver e programar. Arraste um tema para outro dia para reagendar. Clique no nome de um canal para abrir o canal, ou no olho para mostrar ou esconder do calendário.</p>
     </section>
 
     <aside class="side">
@@ -405,6 +410,9 @@ function useLocal(){
 
 
 /* ---------- Render ---------- */
+const EYE=`<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8Z" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="8" cy="8" r="2" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>`;
+const EYE_OFF=`<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8Z" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M2.5 13.5l11-11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>`;
+function safeUrl(u){if(!u)return "";u=String(u).trim();if(!/^https?:\/\//i.test(u))u="https://"+u;try{const x=new URL(u);return /^https?:$/.test(x.protocol)?x.href:""}catch(e){return ""}}
 function relDay(k){const n=Math.round((parse(k)-parse(TODAY))/864e5);return n===0?"hoje":n===1?"amanhã":SEM[parse(k).getDay()].toLowerCase()}
 function renderQueues(){
   const wrap=$("queues");wrap.innerHTML="";
@@ -419,7 +427,8 @@ function renderQueues(){
     const rel=!last?"sem conteúdo à frente":dias===0?"hoje":dias===1?"amanhã":`daqui a ${dias} dias`;
     const card=document.createElement("div");
     card.className="q"+(hidden.has(c)?" off":"");card.dataset.c=c;card.style.cssText=cv(c);
-    card.innerHTML=`<button type="button" class="qhead" aria-pressed="${!hidden.has(c)}" title="${hidden.has(c)?"Mostrar no calendário":"Esconder do calendário"}"><span class="dot"></span><span class="qname">${esc(CH[c].nome)}</span>${CH[c].colab?`<span class="plat" title="Colaborador">${esc(CH[c].colab)}</span>`:""}${chip}</button>
+    const url=safeUrl(CH[c].link);
+    card.innerHTML=`<div class="qhead"><span class="dot"></span>${url?`<a class="qname qlink" href="${esc(url).replace(/"/g,"&quot;")}" target="_blank" rel="noopener" title="Abrir o canal em nova guia">${esc(CH[c].nome)}<svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true"><path d="M4.5 2.5h5v5M9.5 2.5 3 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>`:`<span class="qname">${esc(CH[c].nome)}</span>`}${CH[c].colab?`<span class="plat" title="Colaborador">${esc(CH[c].colab)}</span>`:""}${chip}<button type="button" class="eye" aria-pressed="${!hidden.has(c)}" aria-label="${hidden.has(c)?"Mostrar no calendário":"Esconder do calendário"}" title="${hidden.has(c)?"Mostrar no calendário":"Esconder do calendário"}">${hidden.has(c)?EYE_OFF:EYE}</button></div>
       <div class="stats">
         <div class="stat"><span class="k">Programados</span><span class="v${fut.length?"":" dim"}">${fut.length}</span></div>
         <div class="stat"><span class="k">Fila até</span><span class="v${last?"":" dim"}">${last?fmtShort(last):"--/--"}</span><span class="s">${rel}</span></div>
@@ -432,7 +441,7 @@ function renderQueues(){
         </button>
         ${isOpen?`<ul class="nlist">${fut.slice(1).map(p=>`<li><button type="button" data-d="${p.data}"><span class="when"><em>${relDay(p.data)}</em>${fmtShort(p.data)}</span><span class="tt">${esc(p.tema)}</span></button></li>`).join("")}</ul>`:""}
       </div>`;
-    card.querySelector(".qhead").onclick=()=>{hidden.has(c)?hidden.delete(c):hidden.add(c);try{localStorage.setItem("agenda.hidden",JSON.stringify([...hidden]))}catch(e){}render()};
+    card.querySelector(".eye").onclick=()=>{hidden.has(c)?hidden.delete(c):hidden.add(c);try{localStorage.setItem("agenda.hidden",JSON.stringify([...hidden]))}catch(e){}render()};
     const nb=card.querySelector(".next");
     nb.onclick=()=>{
       if(fut.length>1){openQ.has(c)?openQ.delete(c):openQ.add(c);renderQueues()}
@@ -565,12 +574,12 @@ function renderMg(){
 }
 function chShowErr(m){const e=$("chErr");e.textContent=m;e.hidden=false}
 function chStartEdit(c){
-  chEditing=c;$("chNome").value=CH[c].nome;fillColab(CH[c].colab||"");chCor=CH[c].cor||"verde";
+  chEditing=c;$("chNome").value=CH[c].nome;fillColab(CH[c].colab||"");$("chLink").value=CH[c].link||"";chCor=CH[c].cor||"verde";
   $("chFormTitle").textContent="Editar canal";$("chSave").textContent="Salvar canal";$("chCancel").hidden=false;$("chErr").hidden=true;
   renderCores();renderMg();$("chNome").focus();
 }
 function chStopEdit(){
-  chEditing=null;$("chNome").value="";fillColab("");chCor=freeCor();
+  chEditing=null;$("chNome").value="";$("chLink").value="";fillColab("");chCor=freeCor();
   $("chFormTitle").textContent="Adicionar canal";$("chSave").textContent="Adicionar canal";$("chCancel").hidden=true;$("chErr").hidden=true;
   renderCores();renderMg();
 }
@@ -587,8 +596,10 @@ $("chForm").addEventListener("submit",async e=>{
     if(!colab){chShowErr("Escreva o nome do novo colaborador.");$("chColabNovo").focus();return}
     colab=colabs().find(n=>n.toLowerCase()===colab.toLowerCase())||colab;
   }
+  const rawLink=$("chLink").value.trim();const link=rawLink?safeUrl(rawLink):"";
+  if(rawLink&&!link){chShowErr("Esse link não parece válido. Copie o endereço do canal direto do navegador.");return}
   const prev=chEditing?CH[chEditing]:null;
-  const c={id:chEditing||("c"+Date.now().toString(36)+Math.random().toString(36).slice(2,5)),nome,colab,cor:chCor,
+  const c={id:chEditing||("c"+Date.now().toString(36)+Math.random().toString(36).slice(2,5)),nome,colab,link,cor:chCor,
     ordem:prev?prev.ordem??0:Math.max(-1,...chans.map(x=>x.ordem??0))+1};
   $("chSave").disabled=true;
   try{await putCh(c);toast(prev?"Canal atualizado":`${nome} adicionado`);if(!prev)canal=c.id;chStopEdit();render()}
