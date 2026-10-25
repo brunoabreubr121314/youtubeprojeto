@@ -131,6 +131,7 @@ O id do tema está presente quando ele foi marcado como agendado no YouTube; des
 - **Calendário mensal** com os temas na cor do canal. O dia de hoje tem contorno azul. No celular, mostra bolinhas coloridas em vez dos títulos.
 - Painéis do **dia selecionado** e dos **Próximos 14 dias**.
 - **Check "agendado no YouTube"**: um círculo ao lado de cada tema. Fica verde ✓ quando marcado, é compartilhado entre todos e é atualizado a cada 45 segundos.
+  Ao clicar, abre uma confirmação (`<dialog id="ckDlg">`): "Você é **<colaborador do canal>** e já agendou no YouTube o vídeo “…”?", com **Sim** e **Não**. Esc, clicar fora ou **Não** fecham sem marcar. Para desmarcar, pergunta "Remover o check…?". Se o canal não tem colaborador, a pergunta omite o nome. Funciona em PC e celular (no celular aparece perto da parte de baixo da tela).
 - Títulos com link do Drive aparecem com ↗ e abrem em nova guia.
 - Modo claro e escuro automáticos, conforme o sistema.
 
@@ -255,6 +256,7 @@ Se uma alteração em `base.html` mudar um trecho que o `build.py` procura, o bu
 12. Ícone da aba (favicon).
 13. **Check "agendado no YouTube"** compartilhado, via Cloudflare Worker e KV.
 14. Código-fonte e script de build guardados em `fonte/`, junto com este documento.
+15. Confirmação antes de marcar ou desmarcar o check ("Você é <colaborador>…?", com Sim e Não; Esc fecha).
 
 O artifact original dentro do Claude ("Agenda de Conteúdo") **não está ligado a este site** e ficou desatualizado. Use o site.
 

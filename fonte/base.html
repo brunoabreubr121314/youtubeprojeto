@@ -120,6 +120,18 @@ a.t{display:block}
 .ytchk:hover{opacity:1;border-color:var(--ok)}
 .ytchk[aria-pressed="true"]{background:var(--ok);border-color:var(--ok);opacity:1}
 .okt{color:var(--ok);font-weight:600}
+.ckdlg{border:0;padding:0;background:transparent;max-width:min(420px,calc(100vw - 32px));width:100%;color:var(--fg)}
+.ckdlg::backdrop{background:rgba(10,12,18,.45)}
+.ckbox{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px 20px 18px;display:flex;flex-direction:column;gap:14px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.ckcanal{font-size:12px;font-weight:700;color:var(--c);display:flex;align-items:center;gap:6px;letter-spacing:.02em}
+.ckcanal::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--c)}
+.ckq{margin:0;font-size:17px;line-height:1.4;text-wrap:pretty}
+.ckq b{font-weight:700}
+.ckbtns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+.ckbtns button{padding:13px;font-size:16px;font-weight:700;border-radius:10px}
+@media (max-width:640px){.ckdlg{margin:auto auto calc(16px + env(safe-area-inset-bottom,0px))}}
+@media (prefers-reduced-motion:no-preference){.ckdlg[open] .ckbox{animation:ckin .14s ease-out}}
+@keyframes ckin{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
 .q.off{opacity:.45}
 .q{box-shadow:inset 0 3px 0 var(--c)}
 .dot{width:10px;height:10px;border-radius:50%;flex:none;background:var(--c)}
@@ -300,6 +312,16 @@ input[type=text],input[type=date],input[type=time],select{border:1px solid var(-
   </div>
 </div>
 <div class="toast" id="toast" hidden></div>
+<dialog class="ckdlg" id="ckDlg" aria-labelledby="ckQ">
+  <div class="ckbox">
+    <span class="ckcanal" id="ckCanal"></span>
+    <p class="ckq" id="ckQ"></p>
+    <div class="ckbtns">
+      <button type="button" class="ghost" id="ckNao">Não</button>
+      <button type="button" class="primary" id="ckSim">Sim</button>
+    </div>
+  </div>
+</dialog>
 
 <script>
 const SEED_POSTS=[{"canal": "mt", "criado": 1792761104891, "data": "2026-10-23", "hora": "09:30", "status": "planejado", "tema": "Ele esfriou de uma hora pra outra", "id": "pmvkzo9objyl6"}, {"canal": "li", "criado": 1792761249279, "data": "2026-10-24", "hora": "08:00", "status": "planejado", "tema": "Banho de Espuma", "id": "pmvkzrd330im4"}, {"canal": "li", "criado": 1792761267157, "data": "2026-10-28", "hora": "08:00", "status": "planejado", "tema": "Dança do Sapinho", "id": "pmvkzrqvpeio0"}, {"canal": "li", "criado": 1792761295711, "data": "2026-10-31", "hora": "08:00", "status": "planejado", "tema": "Salada de cores", "id": "pmvkzscwvptro"}, {"canal": "li", "criado": 1792761316471, "data": "2026-11-04", "hora": "08:00", "status": "planejado", "tema": "tremzinho da turma", "id": "pmvkzssxjz03c"}, {"canal": "wl", "criado": 1792761442190, "data": "2026-10-22", "hora": "17:00", "status": "planejado", "tema": "Social Security at 62 vs 70", "id": "pmvkzvhxqcsm9"}, {"canal": "mt", "criado": 1792765641328, "data": "2026-10-23", "hora": "19:00", "status": "planejado", "tema": "Mudou a senha do celular", "id": "pmvl2di0giwj1"}, {"canal": "mt", "criado": 1792765675137, "data": "2026-10-24", "hora": "08:00", "status": "planejado", "tema": "Ele jurou de pes juntos", "id": "pmvl2e83leriy"}, {"canal": "mt", "criado": 1792765755968, "data": "2026-10-24", "hora": "19:00", "status": "planejado", "tema": "Quer descobrir se alguem esta mentindo", "id": "pmvl2fygw4k5m"}, {"canal": "mt", "criado": 1792765834253, "data": "2026-10-25", "hora": "08:00", "status": "planejado", "tema": "uma má pessoa raramente vai mostrar as garras", "id": "pmvl2hmvhlb50"}, {"canal": "mt", "criado": 1792765911270, "data": "2026-10-25", "hora": "19:00", "status": "planejado", "tema": "voce foi traida, descobriu tudo e agora", "id": "pmvl2jaaurzzn"}, {"canal": "mt", "criado": 1792766014315, "data": "2026-10-26", "hora": "08:00", "status": "planejado", "tema": "ele prefere ficar com os amigos", "id": "pmvl2lht72ld7"}, {"canal": "mt", "criado": 1792766086252, "data": "2026-10-26", "hora": "19:00", "status": "planejado", "tema": "voce tem aquela amiga que fica colada com seu marido", "id": "pmvl2n1bgetbo"}];
@@ -434,7 +456,26 @@ async function toggleCheck(id){
   }catch(e){checks={...checks};if(prev)checks[id]=prev;else delete checks[id];render();toast("Não foi possível salvar o check. Tente de novo.")}
   finally{checkBusy.delete(id)}
 }
-document.addEventListener("click",e=>{const b=e.target.closest(".ytchk");if(!b)return;e.preventDefault();e.stopPropagation();toggleCheck(b.dataset.id)},true);
+document.addEventListener("click",e=>{const b=e.target.closest(".ytchk");if(!b)return;e.preventDefault();e.stopPropagation();askCheck(b.dataset.id)},true);
+function askCheck(id){
+  const p=posts.find(x=>x.id===id);if(!p)return;
+  const dlg=$("ckDlg");if(!dlg||typeof dlg.showModal!=="function"){toggleCheck(id);return}
+  const marking=!checks[id];const colab=CH[p.canal]&&CH[p.canal].colab;
+  $("ckQ").innerHTML=marking
+    ?(colab?`Você é <b>${esc(colab)}</b> e já agendou no YouTube o vídeo <b>“${esc(p.tema)}”</b>?`:`Você já agendou no YouTube o vídeo <b>“${esc(p.tema)}”</b>?`)
+    :`Remover o check de agendado do vídeo <b>“${esc(p.tema)}”</b>?`;
+  $("ckCanal").textContent=CH[p.canal]?CH[p.canal].nome+" · "+fmtShort(p.data)+(p.hora?" às "+p.hora:""):"";
+  $("ckCanal").style.cssText=cv(p.canal);
+  dlg.dataset.id=id;dlg.returnValue="";
+  dlg.showModal();setTimeout(()=>$("ckSim").focus(),0);
+}
+(function(){
+  const dlg=$("ckDlg");if(!dlg)return;
+  $("ckSim").onclick=()=>dlg.close("sim");
+  $("ckNao").onclick=()=>dlg.close("nao");
+  dlg.addEventListener("click",e=>{if(e.target===dlg)dlg.close("nao")});
+  dlg.addEventListener("close",()=>{if(dlg.returnValue==="sim"&&dlg.dataset.id)toggleCheck(dlg.dataset.id)});
+})();
 if(CHECK_URL){setInterval(()=>{if(!document.hidden)loadChecks()},45000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)loadChecks()})}
 function relDay(k){const n=Math.round((parse(k)-parse(TODAY))/864e5);return n===0?"hoje":n===1?"amanhã":SEM[parse(k).getDay()].toLowerCase()}
 function renderQueues(){
