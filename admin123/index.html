@@ -5,6 +5,7 @@
 <meta name="robots" content="noindex,nofollow">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Agenda de Conteúdo · Admin</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%277%27 fill=%27%232F7FD6%27/%3E%3Crect x=%277%27 y=%279%27 width=%2718%27 height=%2716%27 rx=%273%27 fill=%27none%27 stroke=%27white%27 stroke-width=%272.5%27/%3E%3Cpath d=%27M7 14h18M12 6v5M20 6v5%27 stroke=%27white%27 stroke-width=%272.5%27 stroke-linecap=%27round%27/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
 <style>
@@ -229,7 +230,7 @@ input[type=text],input[type=date],input[type=time],select{border:1px solid var(-
         <div class="clock"><span class="city">Brasília</span><b id="clkBR">--:--</b><small id="dtBR"></small></div>
         <div class="clock"><span class="city">Nova York</span><b id="clkNY">--:--</b><small id="dtNY"></small></div>
       </div>
-      <div class="bk"><div class="sync" id="sync"><i></i><span>Conectando…</span></div><button type="button" class="bkb" id="pubBtn">Publicar agora</button><button type="button" class="bkb" id="ghBtn">Chave do GitHub</button><button type="button" class="bkb admin-only" id="exp">Baixar backup</button><label class="bkb admin-only" for="imp">Restaurar backup<input type="file" id="imp" accept=".json,application/json" hidden></label></div>
+      <div class="bk"><div class="sync" id="sync"><i></i><span>Conectando…</span></div><button type="button" class="bkb" id="pubBtn">Publicar agora</button><button type="button" class="bkb" id="useRemote" hidden>Usar a versão online</button><button type="button" class="bkb" id="ghBtn">Chave do GitHub</button><button type="button" class="bkb admin-only" id="exp">Baixar backup</button><label class="bkb admin-only" for="imp">Restaurar backup<input type="file" id="imp" accept=".json,application/json" hidden></label></div>
     </div>
   </header>
 
@@ -688,37 +689,65 @@ $("imp").onchange=async e=>{
 
 /* ---------- Publicação no GitHub ---------- */
 const GH={owner:"brunoabreubr121314",repo:"youtubeprojeto",path:"data.json",branch:"main"};
+const API=`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${GH.path}`;
 function tok(){try{return localStorage.getItem("agenda.ghtoken")||""}catch(e){return ""}}
-function isDirty(){try{return localStorage.getItem("agenda.dirty")==="1"}catch(e){return false}}
-function setDirty(v){try{localStorage.setItem("agenda.dirty",v?"1":"0")}catch(e){}}
-let pubTimer=null,publishing=false,pubAgain=false,pubErr="",lastPub=null;
+function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){return null}}
+function isDirty(){return ls("agenda.dirty")==="1"}
+function setDirty(v){ls("agenda.dirty",v?"1":"0")}
+function getBase(){return ls("agenda.baseSha")||null}
+function setBase(s){ls("agenda.baseSha",s||null)}
+let pubTimer=null,publishing=false,pubAgain=false,pubErr="",lastPub=null,conflict=false;
 function setSync(t,cls){const s=$("sync");s.className="sync"+(cls?" "+cls:"");s.querySelector("span").textContent=t}
+function hdr(){return {Authorization:"Bearer "+tok(),Accept:"application/vnd.github+json"}}
+function decode(b64){return JSON.parse(decodeURIComponent(escape(atob(b64.replace(/\s/g,"")))))}
+async function fetchRemote(){
+  if(tok()){
+    const r=await fetch(API+"?ref="+GH.branch+"&t="+Date.now(),{headers:hdr(),cache:"no-store"});
+    if(r.status===401||r.status===403)throw {code:r.status};
+    if(r.status===404)return {sha:null,data:null};
+    if(!r.ok)throw {code:r.status};
+    const j=await r.json();return {sha:j.sha,data:decode(j.content)};
+  }
+  const r=await fetch(DATA_URL+"?t="+Date.now(),{cache:"no-store"});
+  return {sha:null,data:r.ok?await r.json():null};
+}
+function applyRemote(rem){
+  const d=rem.data;if(!d||!Array.isArray(d.posts))return false;
+  posts=d.posts;chans=Array.isArray(d.canais)&&d.canais.length?d.canais:DEFAULT_CH.map(c=>({...c}));
+  persist();setDirty(false);if(rem.sha)setBase(rem.sha);conflict=false;pubErr="";
+  buildCH();if(!CH[canal])canal=ORDER[0]||null;render();return true;
+}
 function updPub(){
-  $("pubBtn").hidden=!tok()||!isDirty()||publishing;
+  $("pubBtn").hidden=!tok()||(!isDirty()&&!conflict)||publishing;
+  $("pubBtn").textContent=conflict?"Publicar a versão deste aparelho":"Publicar agora";
+  $("useRemote").hidden=!conflict;
   $("ghBtn").textContent=tok()?"Chave do GitHub":"Conectar GitHub";
   if(publishing)return setSync("Publicando…","warn");
+  if(conflict)return setSync("A agenda foi alterada em outra aba ou aparelho. Escolha qual versão manter","bad");
   if(pubErr)return setSync(pubErr,"bad");
   if(!tok())return setSync("Salvo só neste aparelho. Conecte o GitHub para publicar","warn");
   if(isDirty())return setSync("Alterações ainda não publicadas","warn");
   setSync(lastPub?`Publicado às ${lastPub.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}`:"Publicado","on");
 }
-function markDirty(){setDirty(true);pubErr="";updPub();clearTimeout(pubTimer);if(tok())pubTimer=setTimeout(publish,2000)}
-async function publish(){
+function markDirty(){setDirty(true);pubErr="";updPub();clearTimeout(pubTimer);if(tok()&&!conflict)pubTimer=setTimeout(publish,2000)}
+async function publish(force){
   clearTimeout(pubTimer);
   if(!tok()){updPub();return}
   if(publishing){pubAgain=true;return}
   publishing=true;pubErr="";updPub();
   try{
-    const api=`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${GH.path}`;
-    const h={Authorization:"Bearer "+tok(),Accept:"application/vnd.github+json"};
-    const g=await fetch(api+"?ref="+GH.branch+"&t="+Date.now(),{headers:h,cache:"no-store"});
+    const g=await fetch(API+"?ref="+GH.branch+"&t="+Date.now(),{headers:hdr(),cache:"no-store"});
     if(g.status===401||g.status===403)throw {code:g.status};
     const sha=g.ok?(await g.json()).sha:undefined;
+    const base=getBase();
+    if(force!==true&&sha&&base&&sha!==base){conflict=true;publishing=false;updPub();return}
     const body=JSON.stringify({canais:chans,posts,atualizado:new Date().toISOString()},null,2);
     const content=btoa(unescape(encodeURIComponent(body)));
-    const p=await fetch(api,{method:"PUT",headers:{...h,"Content-Type":"application/json"},body:JSON.stringify({message:"Atualiza agenda",content,sha,branch:GH.branch})});
+    const p=await fetch(API,{method:"PUT",headers:{...hdr(),"Content-Type":"application/json"},body:JSON.stringify({message:"Atualiza agenda",content,sha,branch:GH.branch})});
+    if(p.status===409){conflict=true;publishing=false;updPub();return}
     if(!p.ok)throw {code:p.status};
-    setDirty(false);lastPub=new Date();
+    const pj=await p.json();setBase(pj.content&&pj.content.sha);
+    setDirty(false);conflict=false;lastPub=new Date();
   }catch(e){
     const auth=e&&(e.code===401||e.code===403||e.code===404);
     pubErr=auth?"Chave do GitHub inválida ou sem permissão de escrita":"Não foi possível publicar. Tentando de novo…";
@@ -727,7 +756,12 @@ async function publish(){
   publishing=false;updPub();
   if(pubAgain){pubAgain=false;publish()}
 }
-$("pubBtn").onclick=publish;
+$("pubBtn").onclick=()=>publish(conflict?true:undefined);
+$("useRemote").onclick=async()=>{
+  try{const rem=await fetchRemote();if(applyRemote(rem))toast("Versão online carregada");else toast("Não encontrei a versão online")}
+  catch(e){toast("Não foi possível carregar a versão online")}
+  updPub();
+};
 $("ghBtn").onclick=()=>{const c=$("ghCard");c.hidden=!c.hidden;if(!c.hidden){$("ghTok").value="";$("ghErr").hidden=true;$("ghTok").focus()}};
 $("ghSave").onclick=async()=>{
   const t=$("ghTok").value.trim();const err=$("ghErr");
@@ -737,24 +771,34 @@ $("ghSave").onclick=async()=>{
     const r=await fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}`,{headers:{Authorization:"Bearer "+t,Accept:"application/vnd.github+json"}});
     const j=r.ok?await r.json():null;
     if(!j||!j.permissions||!j.permissions.push)throw 0;
-    try{localStorage.setItem("agenda.ghtoken",t)}catch(e){}
-    $("ghTok").value="";$("ghCard").hidden=true;toast("Chave salva. Publicando…");
-    setDirty(true);publish();
+    ls("agenda.ghtoken",t);
+    $("ghTok").value="";$("ghCard").hidden=true;toast("Chave salva");
+    const rem=await fetchRemote();
+    if(isDirty()&&getBase()&&rem.sha&&rem.sha!==getBase()){conflict=true;updPub()}
+    else if(isDirty()){if(rem.sha&&!getBase())setBase(rem.sha);publish()}
+    else{applyRemote(rem);updPub()}
   }catch(e){err.textContent="Essa chave não funcionou. Confira se ela tem acesso ao youtubeprojeto com Contents em Read and write.";err.hidden=false}
   finally{$("ghSave").disabled=false}
 };
-$("ghDel").onclick=()=>{try{localStorage.removeItem("agenda.ghtoken")}catch(e){};pubErr="";$("ghCard").hidden=true;updPub();toast("Chave removida deste aparelho")};
+$("ghDel").onclick=()=>{ls("agenda.ghtoken",null);pubErr="";conflict=false;$("ghCard").hidden=true;updPub();toast("Chave removida deste aparelho")};
+
+async function refreshIfChanged(){
+  if(!tok()||publishing||isDirty()||conflict)return;
+  try{const rem=await fetchRemote();if(rem.sha&&rem.sha!==getBase()&&!isDirty()){applyRemote(rem);updPub();toast("Agenda atualizada com mudanças de outro aparelho")}}catch(e){}
+}
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)refreshIfChanged()});
 
 async function boot(){
   local=true;
-  let remote=null;
-  try{const r=await fetch(DATA_URL+"?t="+Date.now(),{cache:"no-store"});if(r.ok)remote=await r.json()}catch(e){}
-  let lp=null,lc=null;try{lp=JSON.parse(localStorage.getItem("agenda.posts")||"null");lc=JSON.parse(localStorage.getItem("agenda.canais")||"null")}catch(e){}
-  if(isDirty()&&Array.isArray(lp)){posts=lp;if(Array.isArray(lc)&&lc.length)chans=lc}
-  else if(remote&&Array.isArray(remote.posts)){posts=remote.posts;chans=Array.isArray(remote.canais)&&remote.canais.length?remote.canais:DEFAULT_CH.map(c=>({...c}));persist()}
-  else if(Array.isArray(lp)){posts=lp;if(Array.isArray(lc)&&lc.length)chans=lc}
-  buildCH();render();updPub();
-  if(isDirty()&&tok())publish();
+  let lp=null,lc=null;try{lp=JSON.parse(ls("agenda.posts")||"null");lc=JSON.parse(ls("agenda.canais")||"null")}catch(e){}
+  let rem=null;try{rem=await fetchRemote()}catch(e){if(e&&(e.code===401||e.code===403))pubErr="Chave do GitHub inválida ou sem permissão de escrita"}
+  if(isDirty()&&Array.isArray(lp)){
+    posts=lp;if(Array.isArray(lc)&&lc.length)chans=lc;buildCH();render();
+    if(rem&&rem.sha&&getBase()&&rem.sha!==getBase())conflict=true;
+    else{if(rem&&rem.sha&&!getBase())setBase(rem.sha);if(tok())publish()}
+  }else if(rem&&rem.data&&applyRemote(rem)){}
+  else{if(Array.isArray(lp)){posts=lp;if(Array.isArray(lc)&&lc.length)chans=lc}buildCH();render()}
+  updPub();
 }
 $("data").value=sel;
 boot();
