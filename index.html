@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Agenda de Conteúdo</title>
+<meta name="description" content="Programação dos canais Wealth Mind, Mentalista e Turma da Lili.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
 <style>
@@ -63,6 +64,15 @@ h1{font-family:var(--f-display);font-weight:800;font-size:clamp(28px,4vw,40px);l
 .bk{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 .bkb{font-size:12px;font-weight:600;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:4px 9px;cursor:pointer;flex-direction:row;letter-spacing:0}
 .bkb:hover{color:var(--fg)}
+
+.ro .admin-only{display:none!important}
+.pubcard ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:14px}
+.pubcard p{margin:0;font-size:14px;color:var(--muted);max-width:70ch}
+.pubcard a{color:var(--now)}
+.pubrow{display:flex;gap:8px;flex-wrap:wrap}
+.pubrow input{flex:1 1 260px;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:9px 10px;min-width:0;font:inherit}
+.sync.warn i{background:var(--warn)} .sync.bad i{background:var(--bad)}
+.item .date{font-family:var(--f-mono);font-size:11.5px;color:var(--muted);width:44px;line-height:1.2}
 
 /* Fila por canal */
 .qbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:-8px}
@@ -209,13 +219,13 @@ input[type=text],input[type=date],input[type=time],select{border:1px solid var(-
         <div class="clock"><span class="city">Brasília</span><b id="clkBR">--:--</b><small id="dtBR"></small></div>
         <div class="clock"><span class="city">Nova York</span><b id="clkNY">--:--</b><small id="dtNY"></small></div>
       </div>
-      <div class="bk"><div class="sync" id="sync"><i></i><span>Conectando…</span></div><button type="button" class="bkb" id="exp">Baixar backup</button><label class="bkb" for="imp">Restaurar backup<input type="file" id="imp" accept=".json,application/json" hidden></label></div>
+      <div class="bk"><div class="sync" id="sync"><i></i><span>Conectando…</span></div><button type="button" class="bkb admin-only" id="exp">Baixar backup</button><label class="bkb admin-only" for="imp">Restaurar backup<input type="file" id="imp" accept=".json,application/json" hidden></label></div>
     </div>
   </header>
 
-  <div class="qbar"><h2 class="sect">Canais</h2><button type="button" class="ghost sm" id="mgOpen" aria-expanded="false">Gerenciar canais</button></div>
+  <div class="qbar"><h2 class="sect">Canais</h2><button type="button" class="ghost sm admin-only" id="mgOpen" aria-expanded="false">Gerenciar canais</button></div>
 
-  <section class="card mg" id="mg" hidden aria-label="Gerenciar canais">
+  <section class="card mg admin-only" id="mg" hidden aria-label="Gerenciar canais">
     <div class="mghead"><h2>Gerenciar canais</h2></div>
     <ul class="mglist" id="mgList"></ul>
     <form class="chform" id="chForm" autocomplete="off">
@@ -244,11 +254,11 @@ input[type=text],input[type=date],input[type=time],select{border:1px solid var(-
         <button class="nav" id="next" aria-label="Próximo mês">›</button>
       </div>
       <div class="grid" id="grid"></div>
-      <p class="legend" style="margin-top:10px">Clique num dia para ver e programar. Arraste um tema para outro dia para reagendar. Clique num canal acima para mostrar ou esconder.</p>
+      <p class="legend" style="margin-top:10px">Clique num dia para ver o que está programado. Clique no nome de um canal para mostrar ou esconder.</p>
     </section>
 
     <aside class="side">
-      <form class="card" id="form" autocomplete="off">
+      <form class="card admin-only" id="form" autocomplete="off">
         <h2 id="formTitle">Programar tema</h2>
         <label for="tema">Tema
           <input type="text" id="tema" placeholder="Ex.: Por que juros compostos enganam" maxlength="140">
@@ -283,8 +293,9 @@ input[type=text],input[type=date],input[type=time],select{border:1px solid var(-
 <div class="toast" id="toast" hidden></div>
 
 <script>
-const SEED_POSTS=[{"canal": "mt", "criado": 1792761104891, "data": "2026-10-23", "hora": "09:30", "status": "planejado", "tema": "Ele esfriou de uma hora pra outra", "id": "pmvkzo9objyl6"}, {"canal": "li", "criado": 1792761249279, "data": "2026-10-24", "hora": "08:00", "status": "planejado", "tema": "Banho de Espuma", "id": "pmvkzrd330im4"}, {"canal": "li", "criado": 1792761267157, "data": "2026-10-28", "hora": "08:00", "status": "planejado", "tema": "Dança do Sapinho", "id": "pmvkzrqvpeio0"}, {"canal": "li", "criado": 1792761295711, "data": "2026-10-31", "hora": "08:00", "status": "planejado", "tema": "Salada de cores", "id": "pmvkzscwvptro"}, {"canal": "li", "criado": 1792761316471, "data": "2026-11-04", "hora": "08:00", "status": "planejado", "tema": "tremzinho da turma", "id": "pmvkzssxjz03c"}, {"canal": "wl", "criado": 1792761442190, "data": "2026-10-22", "hora": "17:00", "status": "planejado", "tema": "Social Security at 62 vs 70", "id": "pmvkzvhxqcsm9"}, {"canal": "mt", "criado": 1792765641328, "data": "2026-10-23", "hora": "19:00", "status": "planejado", "tema": "Mudou a senha do celular", "id": "pmvl2di0giwj1"}, {"canal": "mt", "criado": 1792765675137, "data": "2026-10-24", "hora": "08:00", "status": "planejado", "tema": "Ele jurou de pes juntos", "id": "pmvl2e83leriy"}, {"canal": "mt", "criado": 1792765755968, "data": "2026-10-24", "hora": "19:00", "status": "planejado", "tema": "Quer descobrir se alguem esta mentindo", "id": "pmvl2fygw4k5m"}, {"canal": "mt", "criado": 1792765834253, "data": "2026-10-25", "hora": "08:00", "status": "planejado", "tema": "uma má pessoa raramente vai mostrar as garras", "id": "pmvl2hmvhlb50"}, {"canal": "mt", "criado": 1792765911270, "data": "2026-10-25", "hora": "19:00", "status": "planejado", "tema": "voce foi traida, descobriu tudo e agora", "id": "pmvl2jaaurzzn"}, {"canal": "mt", "criado": 1792766014315, "data": "2026-10-26", "hora": "08:00", "status": "planejado", "tema": "ele prefere ficar com os amigos", "id": "pmvl2lht72ld7"}, {"canal": "mt", "criado": 1792766086252, "data": "2026-10-26", "hora": "19:00", "status": "planejado", "tema": "voce tem aquela amiga que fica colada com seu marido", "id": "pmvl2n1bgetbo"}];
-const SEED_CH=[{"cor": "laranja", "nome": "Turma da Lili", "ordem": 2, "plat": "YouTube", "id": "li"}, {"cor": "roxo", "nome": "Mentalista", "ordem": 1, "plat": "Instagram", "id": "mt"}, {"cor": "verde", "nome": "Wealth Mind", "ordem": 0, "plat": "YouTube", "id": "wl"}];
+const READONLY=true;
+const DATA_URL="data.json";
+if(READONLY)document.documentElement.classList.add("ro");
 const CORES=["verde","roxo","laranja","azul","rosa","ambar","ciano","vermelho"];
 const PLATS=["YouTube","Instagram","TikTok","Facebook","Kwai","X","LinkedIn","Outro"];
 const DEFAULT_CH=[
@@ -332,7 +343,7 @@ function esc(s){const d=document.createElement("div");d.textContent=s;return d.i
 function toast(msg){const t=$("toast");t.textContent=msg;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>t.hidden=true,1800)}
 
 /* ---------- Persistência ---------- */
-function saveLocal(){try{localStorage.setItem("agenda.posts",JSON.stringify(posts))}catch(e){}}
+function saveLocal(){}
 async function put(p){
   const {id,...body}=p;
   if(store){await store.doc(id).set(body)}
@@ -344,7 +355,7 @@ async function remove(id){
 }
 function newId(){return "p"+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
 
-function saveLocalCh(){try{localStorage.setItem("agenda.canais",JSON.stringify(chans))}catch(e){}}
+function saveLocalCh(){}
 async function putCh(c){
   const {id,...body}=c;
   if(chStore){
@@ -371,22 +382,7 @@ function useLocal(){
   const s=$("sync");s.classList.remove("on");s.querySelector("span").textContent="Salvo neste aparelho";
   render();
 }
-(async()=>{
-  let db=null;
-  if(!db){useLocal();return}
-  store=db.collection("posts");
-  chStore=db.collection("canais");
-  chStore.onSnapshot(snap=>{
-    if(snap.empty){chans=DEFAULT_CH.map(c=>({...c}));chInDb=false}
-    else{chans=snap.docs.map(d=>({id:d.id,...d.data()}));chInDb=true}
-    buildCH();render();
-  },()=>{});
-  store.onSnapshot(snap=>{
-    posts=snap.docs.map(d=>({id:d.id,...d.data()}));
-    const s=$("sync");s.classList.add("on");s.querySelector("span").textContent="Sincronizado";
-    render();
-  },err=>{store=null;useLocal()});
-})();
+
 
 /* ---------- Render ---------- */
 function relDay(k){const n=Math.round((parse(k)-parse(TODAY))/864e5);return n===0?"hoje":n===1?"amanhã":SEM[parse(k).getDay()].toLowerCase()}
@@ -446,7 +442,7 @@ function renderCal(){
     items.slice(0,3).forEach(p=>{
       const el=document.createElement("div");el.className="pill"+(p.status==="publicado"?" done":"");el.style.cssText=cv(p.canal);
       el.textContent=(p.hora?p.hora+" ":"")+p.tema;el.title=`${CH[p.canal].nome}: ${p.tema}`;
-      el.draggable=true;
+      el.draggable=!READONLY;if(READONLY)el.style.cursor="default";
       el.addEventListener("dragstart",e=>{e.dataTransfer.setData("text/plain",p.id);e.dataTransfer.effectAllowed="move"});
       cell.appendChild(el);
     });
@@ -454,9 +450,9 @@ function renderCal(){
     if(items.length){const ds=document.createElement("div");ds.className="dots";ds.innerHTML=items.map(p=>`<span class="dot" style="${cv(p.canal)}"></span>`).join("");cell.appendChild(ds)}
     const pick=()=>{sel=k;if(!editing)$("data").value=k;if(d.getMonth()!==view.getMonth()){view=new Date(d.getFullYear(),d.getMonth(),1)}render()};
     cell.onclick=pick;cell.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();pick()}};
-    cell.addEventListener("dragover",e=>{e.preventDefault();cell.classList.add("drop")});
+    cell.addEventListener("dragover",e=>{if(READONLY)return;e.preventDefault();cell.classList.add("drop")});
     cell.addEventListener("dragleave",()=>cell.classList.remove("drop"));
-    cell.addEventListener("drop",async e=>{
+    cell.addEventListener("drop",async e=>{if(READONLY)return;
       e.preventDefault();cell.classList.remove("drop");
       const p=posts.find(x=>x.id===e.dataTransfer.getData("text/plain"));
       if(!p||p.data===k)return;
@@ -469,10 +465,11 @@ function renderCal(){
 function itemRow(p,showDate){
   const li=document.createElement("li");li.className="item"+(p.status==="publicado"?" done":"");
   const done=p.status==="publicado";
-  li.innerHTML=`${showDate?`<div class="date">${fmtShort(p.data)}<br>${p.hora||""}</div>`:`<button class="check" role="checkbox" aria-checked="${done}" aria-label="Marcar como publicado">${done?"✓":""}</button>`}
+  li.innerHTML=`${READONLY&&!showDate?`<div class="date">${p.hora||"—"}</div>`:showDate?`<div class="date">${fmtShort(p.data)}<br>${p.hora||""}</div>`:`<button class="check" role="checkbox" aria-checked="${done}" aria-label="Marcar como publicado">${done?"✓":""}</button>`}
     <div style="min-width:0"><div class="t">${esc(p.tema)}</div><div class="meta"><span class="dot" style="${cv(p.canal)};display:inline-block;width:8px;height:8px;margin-right:5px"></span>${esc(CH[p.canal].nome)}${!showDate&&p.hora?" · "+p.hora:""}${done?" · publicado":""}</div></div>
-    <div class="ibtn">${showDate?"":`<button class="edit">Editar</button><button class="del${confirmDel===p.id?" sure":""}">${confirmDel===p.id?"Confirmar":"Excluir"}</button>`}</div>`;
-  if(showDate){li.style.cursor="pointer";li.onclick=()=>{sel=p.data;view=new Date(parse(p.data).getFullYear(),parse(p.data).getMonth(),1);render()}}
+    <div class="ibtn">${showDate||READONLY?"":`<button class="edit">Editar</button><button class="del${confirmDel===p.id?" sure":""}">${confirmDel===p.id?"Confirmar":"Excluir"}</button>`}</div>`;
+  if(READONLY&&!showDate){}
+  else if(showDate){li.style.cursor="pointer";li.onclick=()=>{sel=p.data;view=new Date(parse(p.data).getFullYear(),parse(p.data).getMonth(),1);render()}}
   else{
     li.querySelector(".check").onclick=()=>put({...p,status:done?"planejado":"publicado"});
     li.querySelector(".edit").onclick=()=>startEdit(p);
@@ -489,7 +486,7 @@ function renderDay(){
   $("dayTitle").textContent=sel===TODAY?"Hoje":fmtLong(sel).replace(/^./,c=>c.toUpperCase());
   $("dayCount").textContent=fmtShort(sel)+"/"+sel.slice(0,4);
   const ul=$("dayList");ul.innerHTML="";
-  if(!items.length){ul.innerHTML=`<p class="empty">Nada programado para este dia. Preencha o formulário acima para adicionar um tema.</p>`;return}
+  if(!items.length){ul.innerHTML=`<p class="empty">${READONLY?"Nada programado para este dia.":"Nada programado para este dia. Preencha o formulário acima para adicionar um tema."}</p>`;return}
   items.forEach(p=>ul.appendChild(itemRow(p,false)));
 }
 
@@ -634,9 +631,23 @@ $("imp").onchange=async e=>{
   e.target.value="";
 };
 
-buildCH();
+/* ---------- Carregar agenda publicada ---------- */
+function setSync(t,cls){const s=$("sync");s.className="sync"+(cls?" "+cls:"");s.querySelector("span").textContent=t}
+async function boot(first){
+  try{
+    const r=await fetch(DATA_URL+"?t="+Date.now(),{cache:"no-store"});
+    if(!r.ok)throw 0;
+    const j=await r.json();
+    posts=Array.isArray(j.posts)?j.posts:[];chans=Array.isArray(j.canais)?j.canais:[];
+    buildCH();render();
+    const at=j.atualizado?new Date(j.atualizado):null;
+    setSync(at?`Atualizado ${at.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"})} às ${at.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}`:"Atualizado","on");
+  }catch(e){if(first){chans=[];posts=[];buildCH();render()}setSync("Não foi possível carregar a agenda. Atualize a página.","bad")}
+}
+local=true;
 $("data").value=sel;
-render();
+boot(true);
+setInterval(()=>{if(!document.hidden)boot(false)},120000);
 </script>
 
 </body>
