@@ -8,11 +8,12 @@
       "id": "li"
     },
     {
-      "cor": "roxo",
+      "id": "mt",
       "nome": "Mentalista",
-      "ordem": 1,
-      "plat": "Instagram",
-      "id": "mt"
+      "colab": "Pedro",
+      "link": "",
+      "cor": "roxo",
+      "ordem": 1
     },
     {
       "cor": "verde",
@@ -149,5 +150,5 @@
       "id": "pmvl2n1bgetbo"
     }
   ],
-  "atualizado": "2026-10-25T22:49:31.400423Z"
+  "atualizado": "2026-10-25T22:50:57.576Z"
 }
