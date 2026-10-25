@@ -1,27 +1,12 @@
 {
   "canais": [
     {
-      "cor": "laranja",
-      "nome": "Turma da Lili",
-      "ordem": 2,
-      "plat": "YouTube",
-      "id": "li"
-    },
-    {
       "id": "mt",
       "nome": "Mentalista",
       "colab": "Pedro",
       "link": "",
       "cor": "roxo",
       "ordem": 1
-    },
-    {
-      "id": "cmvoejx1sqk0",
-      "nome": "sssssaaaaaa",
-      "colab": "Pedro",
-      "link": "https://www.youtube.com/@YTWealthMind",
-      "cor": "azul",
-      "ordem": 3
     }
   ],
   "posts": [
@@ -33,42 +18,6 @@
       "status": "planejado",
       "tema": "Ele esfriou de uma hora pra outra",
       "id": "pmvkzo9objyl6"
-    },
-    {
-      "canal": "li",
-      "criado": 1792761249279,
-      "data": "2026-10-24",
-      "hora": "08:00",
-      "status": "planejado",
-      "tema": "Banho de Espuma",
-      "id": "pmvkzrd330im4"
-    },
-    {
-      "canal": "li",
-      "criado": 1792761267157,
-      "data": "2026-10-28",
-      "hora": "08:00",
-      "status": "planejado",
-      "tema": "Dança do Sapinho",
-      "id": "pmvkzrqvpeio0"
-    },
-    {
-      "canal": "li",
-      "criado": 1792761295711,
-      "data": "2026-10-31",
-      "hora": "08:00",
-      "status": "planejado",
-      "tema": "Salada de cores",
-      "id": "pmvkzscwvptro"
-    },
-    {
-      "canal": "li",
-      "criado": 1792761316471,
-      "data": "2026-11-04",
-      "hora": "08:00",
-      "status": "planejado",
-      "tema": "tremzinho da turma",
-      "id": "pmvkzssxjz03c"
     },
     {
       "canal": "mt",
@@ -144,5 +93,5 @@
       "criado": 1792968706977
     }
   ],
-  "atualizado": "2026-10-25T23:35:39.584Z"
+  "atualizado": "2026-10-25T23:35:43.474Z"
 }
