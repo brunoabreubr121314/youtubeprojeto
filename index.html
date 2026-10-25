@@ -125,6 +125,12 @@ a.t{display:block}
 .nlist .when{font-family:var(--f-mono);font-size:12px;line-height:1.15;text-align:center;border-right:1px solid var(--line);padding-right:10px;min-width:58px}
 .nlist .when em{display:block;font-style:normal;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 .nlist .tt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.next.hasck{grid-template-columns:auto auto minmax(0,1fr) auto}
+.nlist li.hasck{grid-template-columns:auto auto minmax(0,1fr)}
+.ytchk{width:22px;height:22px;border-radius:50%;border:2px solid var(--muted);background:var(--surface);color:var(--surface);display:grid;place-items:center;padding:0;cursor:pointer;flex:none;opacity:.7}
+.ytchk:hover{opacity:1;border-color:var(--ok)}
+.ytchk[aria-pressed="true"]{background:var(--ok);border-color:var(--ok);opacity:1}
+.okt{color:var(--ok);font-weight:600}
 .q.off{opacity:.45}
 .q{box-shadow:inset 0 3px 0 var(--c)}
 .dot{width:10px;height:10px;border-radius:50%;flex:none;background:var(--c)}
@@ -404,6 +410,29 @@ const EYE_OFF=`<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true
 function safeUrl(u){if(!u)return "";u=String(u).trim();if(!/^https?:\/\//i.test(u))u="https://"+u;try{const x=new URL(u);return /^https?:$/.test(x.protocol)?x.href:""}catch(e){return ""}}
 const LINK_SVG=`<svg class="lk" viewBox="0 0 12 12" width="11" height="11" aria-hidden="true"><path d="M4.5 2.5h5v5M9.5 2.5 3 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 function themeHtml(p,cls){const u=safeUrl(p.link);return u?`<a class="${cls} tlink" href="${esc(u).replace(/"/g,"&quot;")}" target="_blank" rel="noopener" title="Abrir o link do Drive">${esc(p.tema)}${LINK_SVG}</a>`:`<span class="${cls}">${esc(p.tema)}</span>`}
+/* ---------- Check "agendado no YouTube" (compartilhado) ---------- */
+const CHECK_URL="";
+let checks={};
+const CHK_SVG=`<svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true"><path d="M2.5 6.2 5 8.5l4.5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+function fmtDT(iso){const d=new Date(iso);return isNaN(d)?"":`${pad(d.getDate())}/${pad(d.getMonth()+1)} às ${pad(d.getHours())}:${pad(d.getMinutes())}`}
+function checkBtn(p){if(!CHECK_URL)return "";const c=checks[p.id];return `<button type="button" class="ytchk" data-id="${p.id}" aria-pressed="${!!c}" aria-label="${c?"Agendado no YouTube. Desmarcar":"Marcar como agendado no YouTube"}" title="${c?"Agendado no YouTube"+(c.em?" em "+fmtDT(c.em):"")+". Clique para desmarcar":"Marcar como agendado no YouTube"}">${c?CHK_SVG:""}</button>`}
+async function loadChecks(){
+  if(!CHECK_URL)return;
+  try{const r=await fetch(CHECK_URL+"?t="+Date.now(),{cache:"no-store"});if(!r.ok)throw 0;const j=await r.json();if(JSON.stringify(j)!==JSON.stringify(checks)){checks=j;render()}}catch(e){}
+}
+let checkBusy=new Set();
+async function toggleCheck(id){
+  if(checkBusy.has(id))return;checkBusy.add(id);
+  const prev=checks[id],done=!prev;
+  checks={...checks};if(done)checks[id]={em:new Date().toISOString()};else delete checks[id];render();
+  try{
+    const r=await fetch(CHECK_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,done})});
+    if(!r.ok)throw 0;checks=await r.json();render();toast(done?"Marcado como agendado no YouTube":"Check removido");
+  }catch(e){checks={...checks};if(prev)checks[id]=prev;else delete checks[id];render();toast("Não foi possível salvar o check. Tente de novo.")}
+  finally{checkBusy.delete(id)}
+}
+document.addEventListener("click",e=>{const b=e.target.closest(".ytchk");if(!b)return;e.preventDefault();e.stopPropagation();toggleCheck(b.dataset.id)},true);
+if(CHECK_URL){setInterval(()=>{if(!document.hidden)loadChecks()},45000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)loadChecks()})}
 function relDay(k){const n=Math.round((parse(k)-parse(TODAY))/864e5);return n===0?"hoje":n===1?"amanhã":SEM[parse(k).getDay()].toLowerCase()}
 function renderQueues(){
   const wrap=$("queues");wrap.innerHTML="";
@@ -421,24 +450,24 @@ function renderQueues(){
     const url=safeUrl(CH[c].link);
     card.innerHTML=`<div class="qhead"><span class="dot"></span>${url?`<a class="qname qlink" href="${esc(url).replace(/"/g,"&quot;")}" target="_blank" rel="noopener" title="Abrir o canal em nova guia">${esc(CH[c].nome)}<svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true"><path d="M4.5 2.5h5v5M9.5 2.5 3 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>`:`<span class="qname">${esc(CH[c].nome)}</span>`}${CH[c].colab?`<span class="plat" title="Colaborador">${esc(CH[c].colab)}</span>`:""}${chip}</div>
       <div class="stats">
-        <div class="stat"><span class="k">Programados</span><span class="v${fut.length?"":" dim"}">${fut.length}</span></div>
+        <div class="stat"><span class="k">Programados</span><span class="v${fut.length?"":" dim"}">${fut.length}</span>${CHECK_URL&&fut.length?`<span class="s" title="Agendados no YouTube">${fut.filter(p=>checks[p.id]).length} de ${fut.length} agendado${fut.length===1?"":"s"}</span>`:""}</div>
         <div class="stat"><span class="k">Fila até</span><span class="v${last?"":" dim"}">${last?fmtShort(last):"--/--"}</span><span class="s">${rel}</span></div>
       </div>
       <div class="nextwrap${isOpen?" open":""}">
-        <div class="next${next?"":" none"}">
-          <span class="when"><em>${next?relDay(next.data):"próx."}</em>${next?fmtShort(next.data):"--/--"}</span>
+        <div class="next${next?"":" none"}${CHECK_URL?" hasck":""}">
+          ${CHECK_URL?(next?checkBtn(next):"<span></span>"):""}<span class="when"><em>${next?relDay(next.data):"próx."}</em>${next?fmtShort(next.data):"--/--"}</span>
           ${next?themeHtml(next,"tt"):`<span class="tt">Nenhum tema programado</span>`}
           ${fut.length>1?`<button type="button" class="more2" aria-expanded="${isOpen}" aria-label="Ver os próximos ${fut.length-1}">+${fut.length-1}<svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`:"<span></span>"}
         </div>
-        ${isOpen?`<ul class="nlist">${fut.slice(1).map(p=>`<li data-d="${p.data}"><span class="when"><em>${relDay(p.data)}</em>${fmtShort(p.data)}</span>${themeHtml(p,"tt")}</li>`).join("")}</ul>`:""}
+        ${isOpen?`<ul class="nlist">${fut.slice(1).map(p=>`<li data-d="${p.data}"${CHECK_URL?' class="hasck"':""}>${checkBtn(p)}<span class="when"><em>${relDay(p.data)}</em>${fmtShort(p.data)}</span>${themeHtml(p,"tt")}</li>`).join("")}</ul>`:""}
       </div>`;
     const nb=card.querySelector(".next");
     nb.onclick=e=>{
-      if(e.target.closest("a"))return;
+      if(e.target.closest("a,.ytchk"))return;
       if(fut.length>1){openQ.has(c)?openQ.delete(c):openQ.add(c);renderQueues()}
       else if(next)goDay(next.data);
     };
-    card.querySelectorAll(".nlist li").forEach(x=>x.onclick=e=>{if(!e.target.closest("a"))goDay(x.dataset.d)});
+    card.querySelectorAll(".nlist li").forEach(x=>x.onclick=e=>{if(!e.target.closest("a,.ytchk"))goDay(x.dataset.d)});
     wrap.appendChild(card);
   });
 }
@@ -461,7 +490,7 @@ function renderCal(){
     cell.innerHTML=`<div class="n"><span>${d.getDate()}</span></div>`;
     items.slice(0,3).forEach(p=>{
       const el=document.createElement("div");el.className="pill"+(p.status==="publicado"?" done":"");el.style.cssText=cv(p.canal);
-      el.textContent=(p.hora?p.hora+" ":"")+p.tema;el.title=`${CH[p.canal].nome}: ${p.tema}`;
+      el.textContent=(checks[p.id]?"✓ ":"")+(p.hora?p.hora+" ":"")+p.tema;el.title=`${CH[p.canal].nome}: ${p.tema}`;
       el.draggable=!READONLY;if(READONLY)el.style.cursor="default";
       el.addEventListener("dragstart",e=>{e.dataTransfer.setData("text/plain",p.id);e.dataTransfer.effectAllowed="move"});
       cell.appendChild(el);
@@ -483,15 +512,14 @@ function renderCal(){
 }
 
 function itemRow(p,showDate){
-  const li=document.createElement("li");li.className="item"+(p.status==="publicado"?" done":"");
-  const done=p.status==="publicado";
-  li.innerHTML=`${READONLY&&!showDate?`<div class="date">${p.hora||"—"}</div>`:showDate?`<div class="date">${fmtShort(p.data)}<br>${p.hora||""}</div>`:`<button class="check" role="checkbox" aria-checked="${done}" aria-label="Marcar como publicado">${done?"✓":""}</button>`}
-    <div style="min-width:0">${themeHtml(p,"t")}<div class="meta"><span class="dot" style="${cv(p.canal)};display:inline-block;width:8px;height:8px;margin-right:5px"></span>${esc(CH[p.canal].nome)}${!showDate&&p.hora?" · "+p.hora:""}${done?" · publicado":""}</div></div>
-    <div class="ibtn">${showDate||READONLY?"":`<button class="edit">Editar</button><button class="del${confirmDel===p.id?" sure":""}">${confirmDel===p.id?"Confirmar":"Excluir"}</button>`}</div>`;
-  if(READONLY&&!showDate){}
-  else if(showDate){li.style.cursor="pointer";li.onclick=e=>{if(e.target.closest("a"))return;sel=p.data;view=new Date(parse(p.data).getFullYear(),parse(p.data).getMonth(),1);render()}}
-  else{
-    li.querySelector(".check").onclick=()=>put({...p,status:done?"planejado":"publicado"});
+  const li=document.createElement("li");li.className="item"+(checks[p.id]?" agd":"");
+  const first=showDate?`<div class="date">${fmtShort(p.data)}<br>${p.hora||""}</div>`:(CHECK_URL?checkBtn(p):`<div class="date">${p.hora||"—"}</div>`);
+  const actions=showDate?(CHECK_URL?checkBtn(p):""):(READONLY?"":`<button class="edit">Editar</button><button class="del${confirmDel===p.id?" sure":""}">${confirmDel===p.id?"Confirmar":"Excluir"}</button>`);
+  li.innerHTML=`${first}
+    <div style="min-width:0">${themeHtml(p,"t")}<div class="meta"><span class="dot" style="${cv(p.canal)};display:inline-block;width:8px;height:8px;margin-right:5px"></span>${esc(CH[p.canal].nome)}${!showDate&&p.hora?" · "+p.hora:""}${checks[p.id]?` · <span class="okt">agendado no YouTube</span>`:""}</div></div>
+    <div class="ibtn">${actions}</div>`;
+  if(showDate){li.style.cursor="pointer";li.onclick=e=>{if(e.target.closest("a,.ytchk"))return;sel=p.data;view=new Date(parse(p.data).getFullYear(),parse(p.data).getMonth(),1);render()}}
+  else if(!READONLY){
     li.querySelector(".edit").onclick=()=>startEdit(p);
     li.querySelector(".del").onclick=async()=>{
       if(confirmDel!==p.id){confirmDel=p.id;render();return}
