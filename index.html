@@ -260,7 +260,7 @@ input[type=text],input[type=date],input[type=time],select{border:1px solid var(-
         <button class="nav" id="next" aria-label="Próximo mês">›</button>
       </div>
       <div class="grid" id="grid"></div>
-      <p class="legend" style="margin-top:10px">Clique num dia para ver o que está programado. Clique no nome de um canal para abrir o canal, ou no olho para mostrar ou esconder do calendário.</p>
+      <p class="legend" style="margin-top:10px">Clique num dia para ver o que está programado. Clique no nome de um canal para abrir o canal.</p>
     </section>
 
     <aside class="side">
@@ -338,7 +338,7 @@ let editing=null;
 let confirmDel=null;
 let openQ=new Set();
 
-try{const h=JSON.parse(localStorage.getItem("agenda.hidden")||"[]");hidden=new Set(h)}catch(e){}
+try{localStorage.removeItem("agenda.hidden")}catch(e){}
 
 function fmtShort(s){const d=parse(s);return `${pad(d.getDate())}/${pad(d.getMonth()+1)}`}
 function fmtLong(s){const d=parse(s);return `${SEM[d.getDay()].toLowerCase()}, ${d.getDate()} de ${MESES[d.getMonth()]}`}
@@ -409,7 +409,7 @@ function renderQueues(){
     const card=document.createElement("div");
     card.className="q"+(hidden.has(c)?" off":"");card.dataset.c=c;card.style.cssText=cv(c);
     const url=safeUrl(CH[c].link);
-    card.innerHTML=`<div class="qhead"><span class="dot"></span>${url?`<a class="qname qlink" href="${esc(url).replace(/"/g,"&quot;")}" target="_blank" rel="noopener" title="Abrir o canal em nova guia">${esc(CH[c].nome)}<svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true"><path d="M4.5 2.5h5v5M9.5 2.5 3 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>`:`<span class="qname">${esc(CH[c].nome)}</span>`}${CH[c].colab?`<span class="plat" title="Colaborador">${esc(CH[c].colab)}</span>`:""}${chip}<button type="button" class="eye" aria-pressed="${!hidden.has(c)}" aria-label="${hidden.has(c)?"Mostrar no calendário":"Esconder do calendário"}" title="${hidden.has(c)?"Mostrar no calendário":"Esconder do calendário"}">${hidden.has(c)?EYE_OFF:EYE}</button></div>
+    card.innerHTML=`<div class="qhead"><span class="dot"></span>${url?`<a class="qname qlink" href="${esc(url).replace(/"/g,"&quot;")}" target="_blank" rel="noopener" title="Abrir o canal em nova guia">${esc(CH[c].nome)}<svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true"><path d="M4.5 2.5h5v5M9.5 2.5 3 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>`:`<span class="qname">${esc(CH[c].nome)}</span>`}${CH[c].colab?`<span class="plat" title="Colaborador">${esc(CH[c].colab)}</span>`:""}${chip}</div>
       <div class="stats">
         <div class="stat"><span class="k">Programados</span><span class="v${fut.length?"":" dim"}">${fut.length}</span></div>
         <div class="stat"><span class="k">Fila até</span><span class="v${last?"":" dim"}">${last?fmtShort(last):"--/--"}</span><span class="s">${rel}</span></div>
@@ -422,7 +422,6 @@ function renderQueues(){
         </button>
         ${isOpen?`<ul class="nlist">${fut.slice(1).map(p=>`<li><button type="button" data-d="${p.data}"><span class="when"><em>${relDay(p.data)}</em>${fmtShort(p.data)}</span><span class="tt">${esc(p.tema)}</span></button></li>`).join("")}</ul>`:""}
       </div>`;
-    card.querySelector(".eye").onclick=()=>{hidden.has(c)?hidden.delete(c):hidden.add(c);try{localStorage.setItem("agenda.hidden",JSON.stringify([...hidden]))}catch(e){}render()};
     const nb=card.querySelector(".next");
     nb.onclick=()=>{
       if(fut.length>1){openQ.has(c)?openQ.delete(c):openQ.add(c);renderQueues()}
