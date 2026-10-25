@@ -7,6 +7,14 @@
       "link": "",
       "cor": "roxo",
       "ordem": 1
+    },
+    {
+      "id": "cmvogv5ki2t4",
+      "nome": "Teste2",
+      "colab": "Riberin",
+      "link": "https://www.youtube.com/@YTWealthMind",
+      "cor": "vermelho",
+      "ordem": 2
     }
   ],
   "posts": [
@@ -93,5 +101,5 @@
       "criado": 1792968706977
     }
   ],
-  "atualizado": "2026-10-25T23:35:43.474Z"
+  "atualizado": "2026-10-25T23:36:20.548Z"
 }
