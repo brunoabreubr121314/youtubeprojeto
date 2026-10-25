@@ -131,7 +131,7 @@ O id do tema está presente quando ele foi marcado como agendado no YouTube; des
 - **Calendário mensal** com os temas na cor do canal. O dia de hoje tem contorno azul. No celular, mostra bolinhas coloridas em vez dos títulos.
 - Painéis do **dia selecionado** e dos **Próximos 14 dias**.
 - **Check "agendado no YouTube"**: um círculo ao lado de cada tema. Fica verde ✓ quando marcado, é compartilhado entre todos e é atualizado a cada 45 segundos.
-  Ao clicar, abre uma confirmação (`<dialog id="ckDlg">`): "Você é **<colaborador do canal>** e já agendou no YouTube o vídeo “…”?", com **Sim** e **Não**. Esc, clicar fora ou **Não** fecham sem marcar. Para desmarcar, pergunta "Remover o check…?". Se o canal não tem colaborador, a pergunta omite o nome. Funciona em PC e celular (no celular aparece perto da parte de baixo da tela).
+  Ao clicar, abre uma confirmação (`<dialog id="ckDlg">`): "Você é **<colaborador do canal>** e já agendou esse vídeo no YouTube?", com **Sim** e **Não**. Esc, clicar fora ou **Não** fecham sem marcar. Para desmarcar, pergunta "Remover o check de agendado desse vídeo?". Se o canal não tem colaborador, a pergunta omite o nome. Funciona em PC e celular (no celular aparece perto da parte de baixo da tela).
 - Títulos com link do Drive aparecem com ↗ e abrem em nova guia.
 - Modo claro e escuro automáticos, conforme o sistema.
 

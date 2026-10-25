@@ -462,8 +462,8 @@ function askCheck(id){
   const dlg=$("ckDlg");if(!dlg||typeof dlg.showModal!=="function"){toggleCheck(id);return}
   const marking=!checks[id];const colab=CH[p.canal]&&CH[p.canal].colab;
   $("ckQ").innerHTML=marking
-    ?(colab?`Você é <b>${esc(colab)}</b> e já agendou no YouTube o vídeo <b>“${esc(p.tema)}”</b>?`:`Você já agendou no YouTube o vídeo <b>“${esc(p.tema)}”</b>?`)
-    :`Remover o check de agendado do vídeo <b>“${esc(p.tema)}”</b>?`;
+    ?(colab?`Você é <b>${esc(colab)}</b> e já agendou esse vídeo no YouTube?`:`Você já agendou esse vídeo no YouTube?`)
+    :`Remover o check de agendado desse vídeo?`;
   $("ckCanal").textContent=CH[p.canal]?CH[p.canal].nome+" · "+fmtShort(p.data)+(p.hora?" às "+p.hora:""):"";
   $("ckCanal").style.cssText=cv(p.canal);
   dlg.dataset.id=id;dlg.returnValue="";
