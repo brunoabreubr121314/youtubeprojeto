@@ -1,22 +1,6 @@
 {
   "canais": [
     {
-      "id": "mt",
-      "nome": "Mentalista",
-      "colab": "Pedro",
-      "link": "https://drive.google.com/drive/u/0/folders/13-p6hJ-9enq4XCm4WjEnlT4cJtKzJPOW",
-      "cor": "roxo",
-      "ordem": 1
-    },
-    {
-      "id": "cmvogv5ki2t4",
-      "nome": "canal do riberin",
-      "colab": "Riberin",
-      "link": "https://www.youtube.com/@YTWealthMind",
-      "cor": "vermelho",
-      "ordem": 2
-    },
-    {
       "id": "cmvp8m1i86nw",
       "nome": "Ovelinha Lili",
       "colab": "Riberin",
@@ -25,109 +9,6 @@
       "ordem": 3
     }
   ],
-  "posts": [
-    {
-      "canal": "mt",
-      "criado": 1792761104891,
-      "data": "2026-10-23",
-      "hora": "09:30",
-      "status": "planejado",
-      "tema": "Ele esfriou de uma hora pra outra",
-      "id": "pmvkzo9objyl6"
-    },
-    {
-      "canal": "mt",
-      "criado": 1792765641328,
-      "data": "2026-10-23",
-      "hora": "19:00",
-      "status": "planejado",
-      "tema": "Mudou a senha do celular",
-      "id": "pmvl2di0giwj1"
-    },
-    {
-      "canal": "mt",
-      "criado": 1792765675137,
-      "data": "2026-10-24",
-      "hora": "08:00",
-      "status": "planejado",
-      "tema": "Ele jurou de pes juntos",
-      "id": "pmvl2e83leriy"
-    },
-    {
-      "canal": "mt",
-      "criado": 1792765755968,
-      "data": "2026-10-24",
-      "hora": "19:00",
-      "status": "planejado",
-      "tema": "Quer descobrir se alguem esta mentindo",
-      "id": "pmvl2fygw4k5m"
-    },
-    {
-      "canal": "mt",
-      "criado": 1792765834253,
-      "data": "2026-10-25",
-      "hora": "08:00",
-      "status": "planejado",
-      "tema": "uma má pessoa raramente vai mostrar as garras",
-      "id": "pmvl2hmvhlb50"
-    },
-    {
-      "canal": "mt",
-      "criado": 1792765911270,
-      "data": "2026-10-25",
-      "hora": "19:00",
-      "status": "planejado",
-      "tema": "voce foi traida, descobriu tudo e agora",
-      "id": "pmvl2jaaurzzn"
-    },
-    {
-      "canal": "mt",
-      "criado": 1792766014315,
-      "data": "2026-10-26",
-      "hora": "08:00",
-      "status": "planejado",
-      "tema": "ele prefere ficar com os amigos",
-      "id": "pmvl2lht72ld7"
-    },
-    {
-      "canal": "mt",
-      "criado": 1792766086252,
-      "data": "2026-10-26",
-      "hora": "19:00",
-      "status": "planejado",
-      "tema": "voce tem aquela amiga que fica colada com seu marido",
-      "id": "pmvl2n1bgetbo"
-    },
-    {
-      "id": "pmvof9wgxceh2",
-      "tema": "2312412414",
-      "canal": "mt",
-      "data": "2026-10-25",
-      "hora": "16:00",
-      "link": "https://drive.google.com/drive/u/0/folders/13-p6hJ-9enq4XCm4WjEnlT4cJtKzJPOW",
-      "status": "planejado",
-      "criado": 1792968706977
-    },
-    {
-      "id": "pmvogvw56ho48",
-      "tema": "video teste1",
-      "canal": "cmvogv5ki2t4",
-      "data": "2026-10-26",
-      "hora": "16:00",
-      "link": "https://drive.google.com/drive/u/0/folders/13-p6hJ-9enq4XCm4WjEnlT4cJtKzJPOW",
-      "status": "planejado",
-      "criado": 1792971412602
-    },
-    {
-      "id": "pmvogwehl1xoy",
-      "tema": "video teste 3",
-      "canal": "cmvogv5ki2t4",
-      "data": "2026-10-28",
-      "hora": "12:22",
-      "link": "https://drive.google.com/drive/u/0/folders/13-p6hJ-9enq4XCm4WjEnlT4cJtKzJPOW",
-      "status": "planejado",
-      "criado": 1792971436377
-    }
-  ],
-  "atualizado": "2026-10-26T12:33:04.682Z"
+  "posts": [],
+  "atualizado": "2026-10-26T12:33:10.864Z"
 }
