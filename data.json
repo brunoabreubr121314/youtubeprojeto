@@ -15,6 +15,14 @@
       "link": "https://www.youtube.com/@YTWealthMind",
       "cor": "vermelho",
       "ordem": 2
+    },
+    {
+      "id": "cmvp8m1i86nw",
+      "nome": "Ovelinha Lili",
+      "colab": "Riberin",
+      "link": "",
+      "cor": "azul",
+      "ordem": 3
     }
   ],
   "posts": [
@@ -121,5 +129,5 @@
       "criado": 1792971436377
     }
   ],
-  "atualizado": "2026-10-25T23:37:47.734Z"
+  "atualizado": "2026-10-26T12:33:04.682Z"
 }
