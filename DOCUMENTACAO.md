@@ -3,7 +3,7 @@
 Documento para retomar o projeto em outro chat ou com outro assistente. Explica o que o site faz, como ele funciona por dentro, onde está cada peça e como fazer reparos sem perder dados.
 
 Dono: Bruno (GitHub `brunoabreubr121314`, Cloudflare `brunovisuals`).
-Última atualização deste documento: 25/10/2026.
+Última atualização deste documento: 29/10/2026.
 
 ---
 
@@ -16,6 +16,7 @@ Tem duas partes:
 | Parte | Endereço | Quem usa | O que faz |
 |---|---|---|---|
 | Página pública | https://canais.obunker.pro | Amigos e colaboradores | Vê a agenda e marca o check de "agendado no YouTube". Não edita nada. |
+| Página do colaborador | https://canais.obunker.pro/<nome> (ex.: `/pedro`) | Cada colaborador | Igual à pública, mas só com os canais daquele colaborador. |
 | Área de edição | https://canais.obunker.pro/admin123 | Só o Bruno | Programa, edita e exclui temas, gerencia canais e publica para a página pública. |
 
 Endereço alternativo (redireciona para o domínio): https://brunoabreubr121314.github.io/youtubeprojeto/
@@ -59,6 +60,7 @@ Tudo é gratuito: GitHub Pages (repositório público), Cloudflare Workers e KV 
 | Arquivo | Para que serve | Pode editar à mão? |
 |---|---|---|
 | `index.html` | Página pública. **Gerado** pelo `fonte/build.py`. | Não. Edite `fonte/base.html` e rode o build. |
+| `404.html` | Página do colaborador. **Gerado** pelo `fonte/build.py`. O GitHub Pages serve esse arquivo para qualquer endereço que não existe, e ele lê o nome no endereço. | Não. Mesmo motivo. |
 | `admin123/index.html` | Área de edição. **Gerado** pelo `fonte/build.py`. | Não. Mesmo motivo. |
 | `data.json` | A agenda publicada. A área de edição reescreve esse arquivo a cada mudança. | Só para restaurar uma versão antiga (veja a seção 9). |
 | `CNAME` | Domínio personalizado do GitHub Pages. | Só se trocar o domínio. |
@@ -141,6 +143,14 @@ O id do tema está presente quando ele foi marcado como agendado no YouTube; des
 - Recarrega `data.json` a cada 2 minutos.
 - Mostra "Atualizado dd/mm às hh:mm".
 
+### Só na página do colaborador (/<nome>)
+- Mostra só os canais cujo campo **Colaborador** bate com o nome no endereço. Não diferencia maiúsculas nem acentos, e espaços viram hífen (`Pedro` → `/pedro`, `João Silva` → `/joao-silva`).
+- Título vira "Agenda de <nome>". Calendário, próximos 14 dias e checks mostram só os temas desses canais.
+- Endereço sem canais mostra "Não encontrei canais para …".
+- Não precisa criar nada: ao pôr um colaborador num canal pelo admin, o endereço dele já funciona.
+- É só um filtro de visualização. Como o `data.json` e a página principal são públicos, o colaborador ainda consegue ver os outros canais se abrir a página principal.
+- `noindex` para não aparecer no Google.
+
 ### Só na área de edição (/admin123)
 - Formulário **Programar tema**: tema, canal, data, horário (opcional) e link do Drive (opcional).
 - **Editar** e **Excluir** temas. Excluir pede um segundo clique para confirmar. Também dá para arrastar um tema para outro dia no calendário.
@@ -195,7 +205,7 @@ O id do tema está presente quando ele foi marcado como agendado no YouTube; des
 
 1. Clone o repositório: `git clone https://github.com/brunoabreubr121314/youtubeprojeto`
 2. Edite **`fonte/base.html`**. É um arquivo único com HTML, CSS e JS, sem bibliotecas externas além das Google Fonts (Bricolage Grotesque, Figtree, JetBrains Mono).
-3. Rode na raiz do repositório: `python3 fonte/build.py`. Isso regenera `index.html` e `admin123/index.html`.
+3. Rode na raiz do repositório: `python3 fonte/build.py`. Isso regenera `index.html`, `admin123/index.html` e `404.html`.
 4. Antes de commitar, puxe o repositório (`git pull`), porque a área de edição faz commits "Atualiza agenda" o tempo todo.
 5. **Nunca sobrescreva `data.json`** com uma cópia antiga ao fazer deploy de código.
 6. Faça commit e push. O GitHub Pages publica em mais ou menos 1 minuto. Peça um **Ctrl+F5** a quem estiver com a página aberta.
@@ -203,6 +213,7 @@ O id do tema está presente quando ele foi marcado como agendado no YouTube; des
 ### Como o `build.py` funciona
 Ele faz substituições de texto exatas em `base.html` (a função `rep()` falha se não encontrar o trecho) e gera duas versões:
 - **Pública** (`READONLY = true`, `DATA_URL = "data.json"`): adiciona a classe `ro` ao `<html>`, o que esconde tudo com a classe `admin-only` (formulário, gerenciar canais, backup). Desliga arrastar e editar. Lê só o `data.json`. Inclui o olho.
+- **Colaborador** (`404.html`, `READONLY = true`, `DATA_URL = "/data.json"`): igual à pública, mais a função `slug()`, a constante `COLAB` (tirada do endereço) e o filtro de canais e temas logo depois de carregar o `data.json`.
 - **Admin** (`READONLY = false`, `DATA_URL = "../data.json"`): adiciona o cartão "Publicar para os amigos" e os botões de publicação, toda a lógica de API do GitHub, a proteção de conflito e o `noindex`.
 
 Se uma alteração em `base.html` mudar um trecho que o `build.py` procura, o build falha com `AssertionError` mostrando o trecho. Basta ajustar o texto procurado no `build.py`.
@@ -257,6 +268,7 @@ Se uma alteração em `base.html` mudar um trecho que o `build.py` procura, o bu
 13. **Check "agendado no YouTube"** compartilhado, via Cloudflare Worker e KV.
 14. Código-fonte e script de build guardados em `fonte/`, junto com este documento.
 15. Confirmação antes de marcar ou desmarcar o check ("Você é <colaborador>…?", com Sim e Não; Esc fecha).
+16. Página do colaborador: `canais.obunker.pro/<nome>` mostra só os canais dele (via `404.html`). Projeto passou a ser mantido no Claude (Cowork).
 
 O artifact original dentro do Claude ("Agenda de Conteúdo") **não está ligado a este site** e ficou desatualizado. Use o site.
 
@@ -269,5 +281,5 @@ O artifact original dentro do Claude ("Agenda de Conteúdo") **não está ligado
 - Sempre rode `git pull` antes de commitar, porque a área de edição faz commits "Atualiza agenda" com frequência.
 - Não altere nem apague `data.json` sem o Bruno pedir, exceto para restaurar uma versão.
 - Não peça a chave do GitHub para colar em código. Ela só pode ficar no navegador do Bruno.
-- Teste localmente com `python3 -m http.server` na raiz (abrir `/` e `/admin123/`) antes de publicar.
+- Teste localmente com `python3 -m http.server` na raiz (abrir `/` e `/admin123/`) antes de publicar. O `http.server` simples não serve o `404.html`; para testar `/<nome>`, use um servidor que devolva o `404.html` nos endereços inexistentes.
 - Mudanças no Worker precisam ser coladas no editor do Cloudflare (Workers & Pages › `agenda-checks` › Edit code › Deploy).

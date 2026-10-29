@@ -5,14 +5,27 @@ import json,os,re
 AQUI=os.path.dirname(os.path.abspath(__file__))
 RAIZ=os.path.dirname(AQUI)
 SRC=open(os.path.join(AQUI,'base.html'),encoding='utf-8').read()
-def build(ro):
+def build(ro,colab=False):
     s=SRC
     def rep(a,b,cnt=1):
         nonlocal s
         assert a in s,(ro,a[:80]); s=s.replace(a,b,cnt)
+    if colab:
+        # Página do colaborador (404.html): canais.obunker.pro/<nome> mostra só os canais dele.
+        # O GitHub Pages serve 404.html para qualquer endereço que não existe, então o nome vem do endereço.
+        rep('<meta charset="utf-8">','<meta charset="utf-8">\n<meta name="robots" content="noindex,nofollow">')
+        rep('<h1>Agenda de Conteúdo</h1>','<h1 id="cTitle">Agenda de Conteúdo</h1>')
+        rep('<p class="sub">Programação de todos os canais em um calendário só.</p>','<p class="sub" id="cSub">Programação dos seus canais.</p>')
+        rep('Nenhum canal ainda. Use “Gerenciar canais” para adicionar o primeiro.','${COLAB_MSG}')
     rep('<title>Agenda de Conteúdo</title>','<title>Agenda de Conteúdo</title>\n<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%277%27 fill=%27%232F7FD6%27/%3E%3Crect x=%277%27 y=%279%27 width=%2718%27 height=%2716%27 rx=%273%27 fill=%27none%27 stroke=%27white%27 stroke-width=%272.5%27/%3E%3Cpath d=%27M7 14h18M12 6v5M20 6v5%27 stroke=%27white%27 stroke-width=%272.5%27 stroke-linecap=%27round%27/%3E%3C/svg%3E">')
     # flag
-    rep('<script>\n','<script>\nconst READONLY='+('true' if ro else 'false')+';\nconst DATA_URL="'+('data.json' if ro else '../data.json')+'";\nif(READONLY)document.documentElement.classList.add("ro");\n')
+    rep('<script>\n','<script>\nconst READONLY='+('true' if ro else 'false')+';\nconst DATA_URL="'+('/data.json' if colab else 'data.json' if ro else '../data.json')+'";\nif(READONLY)document.documentElement.classList.add("ro");\n')
+    if colab:
+        rep('<script>\n','''<script>
+function slug(t){return String(t||"").normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"")}
+const COLAB=slug(decodeURIComponent(location.pathname.split("/").filter(Boolean)[0]||""));
+let COLAB_MSG="Carregando…";
+''')
     # css
     rep('/* Fila por canal */','''.ro .admin-only{display:none!important}
 .pubcard ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:14px}
@@ -77,6 +90,7 @@ async function boot(first){
     if(!r.ok)throw 0;
     const j=await r.json();
     posts=Array.isArray(j.posts)?j.posts:[];chans=Array.isArray(j.canais)?j.canais:[];
+    /*COLAB_FILTER*/
     buildCH();render();
     const at=j.atualizado?new Date(j.atualizado):null;
     setSync(at?`Atualizado ${at.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"})} às ${at.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}`:"Atualizado","on");
@@ -86,6 +100,16 @@ local=true;
 $("data").value=sel;
 boot(true);
 setInterval(()=>{if(!document.hidden)boot(false)},120000);'''
+        if colab:
+            boot=boot.replace('/*COLAB_FILTER*/','''chans=chans.filter(c=>COLAB&&slug(c.colab)===COLAB);
+    const ids=new Set(chans.map(c=>c.id));posts=posts.filter(p=>ids.has(p.canal));
+    const nome=chans.length?chans[0].colab:"";
+    $("cTitle").textContent=nome?"Agenda de "+nome:"Agenda de Conteúdo";
+    document.title=nome?"Agenda de "+nome:"Agenda de Conteúdo";
+    $("cSub").textContent=nome?(chans.length>1?"Programação dos seus "+chans.length+" canais.":"Programação do seu canal."):"Endereço sem canais.";
+    COLAB_MSG=COLAB?"Não encontrei canais para “"+COLAB+"”. Confira o endereço com o Bruno.":"Endereço incompleto. Confira o endereço com o Bruno.";''')
+        else:
+            boot=boot.replace('/*COLAB_FILTER*/\n    ','')
     else:
         rep('function saveLocal(){try{localStorage.setItem("agenda.posts",JSON.stringify(posts))}catch(e){}}',
             'function persist(){try{localStorage.setItem("agenda.posts",JSON.stringify(posts));localStorage.setItem("agenda.canais",JSON.stringify(chans))}catch(e){}}\nfunction saveLocal(){persist();markDirty()}')
@@ -213,4 +237,5 @@ boot();'''
 os.makedirs(os.path.join(RAIZ,'admin123'),exist_ok=True)
 open(os.path.join(RAIZ,'index.html'),'w',encoding='utf-8').write(build(True))
 open(os.path.join(RAIZ,'admin123','index.html'),'w',encoding='utf-8').write(build(False))
-print('Gerados: index.html e admin123/index.html')
+open(os.path.join(RAIZ,'404.html'),'w',encoding='utf-8').write(build(True,colab=True))
+print('Gerados: index.html, admin123/index.html e 404.html (página do colaborador)')
