@@ -15,6 +15,14 @@
       "link": "https://www.youtube.com/@segundaeucomeco.curtas",
       "cor": "azul",
       "ordem": 4
+    },
+    {
+      "id": "cmvu8n9437yx",
+      "nome": "Turma da Lili",
+      "colab": "Bruno (Meus)",
+      "link": "https://www.youtube.com/@turmadalilioficial",
+      "cor": "vermelho",
+      "ordem": 5
     }
   ],
   "posts": [
@@ -109,5 +117,5 @@
       "criado": 1793299143754
     }
   ],
-  "atualizado": "2026-10-30T00:00:47.658Z"
+  "atualizado": "2026-10-30T00:32:52.124Z"
 }
