@@ -15,8 +15,8 @@ Tem duas partes:
 
 | Parte | Endereço | Quem usa | O que faz |
 |---|---|---|---|
-| Página pública | https://canais.obunker.pro | Amigos e colaboradores | Vê a agenda e marca o check de "agendado no YouTube". Não edita nada. |
-| Página do colaborador | https://canais.obunker.pro/<nome> (ex.: `/pedro`) | Cada colaborador | Igual à pública, mas só com os canais daquele colaborador. |
+| Página principal | https://canais.obunker.pro | Ninguém | Só um aviso: "use o link que você recebeu do Bruno". Não mostra canais. |
+| Página do colaborador | https://canais.obunker.pro/<nome> (ex.: `/riberin`) | Cada colaborador | Vê a agenda só dos canais dele e marca o check de "agendado no YouTube". Não edita nada. |
 | Área de edição | https://canais.obunker.pro/admin123 | Só o Bruno | Programa, edita e exclui temas, gerencia canais e publica para a página pública. |
 
 Endereço alternativo (redireciona para o domínio): https://brunoabreubr121314.github.io/youtubeprojeto/
@@ -59,7 +59,7 @@ Tudo é gratuito: GitHub Pages (repositório público), Cloudflare Workers e KV 
 
 | Arquivo | Para que serve | Pode editar à mão? |
 |---|---|---|
-| `index.html` | Página pública. **Gerado** pelo `fonte/build.py`. | Não. Edite `fonte/base.html` e rode o build. |
+| `index.html` | Página principal (só o aviso). **Gerado** pelo `fonte/build.py` (função `aviso()`). | Não. Edite o `build.py` e rode o build. |
 | `404.html` | Página do colaborador. **Gerado** pelo `fonte/build.py`. O GitHub Pages serve esse arquivo para qualquer endereço que não existe, e ele lê o nome no endereço. | Não. Mesmo motivo. |
 | `admin123/index.html` | Área de edição. **Gerado** pelo `fonte/build.py`. | Não. Mesmo motivo. |
 | `data.json` | A agenda publicada. A área de edição reescreve esse arquivo a cada mudança. | Só para restaurar uma versão antiga (veja a seção 9). |
@@ -137,7 +137,7 @@ O id do tema está presente quando ele foi marcado como agendado no YouTube; des
 - Títulos com link do Drive aparecem com ↗ e abrem em nova guia.
 - Modo claro e escuro automáticos, conforme o sistema.
 
-### Só na página pública
+### Só na página do colaborador (somente leitura)
 - Nenhum botão de edição.
 - **Ícone de olho** em cada cartão, que esconde os temas daquele canal. A escolha fica salva no navegador de cada pessoa (`localStorage` `agenda.hidden`).
 - Recarrega `data.json` a cada 2 minutos.
@@ -212,7 +212,8 @@ O id do tema está presente quando ele foi marcado como agendado no YouTube; des
 
 ### Como o `build.py` funciona
 Ele faz substituições de texto exatas em `base.html` (a função `rep()` falha se não encontrar o trecho) e gera duas versões:
-- **Pública** (`READONLY = true`, `DATA_URL = "data.json"`): adiciona a classe `ro` ao `<html>`, o que esconde tudo com a classe `admin-only` (formulário, gerenciar canais, backup). Desliga arrastar e editar. Lê só o `data.json`. Inclui o olho.
+- **Principal** (`index.html`): página fixa de aviso, gerada pela função `aviso()`. Não carrega agenda.
+- **Somente leitura** (base da página do colaborador; `READONLY = true`): adiciona a classe `ro` ao `<html>`, o que esconde tudo com a classe `admin-only` (formulário, gerenciar canais, backup). Desliga arrastar e editar. Lê só o `data.json`. Inclui o olho.
 - **Colaborador** (`404.html`, `READONLY = true`, `DATA_URL = "/data.json"`): igual à pública, mais a função `slug()`, a constante `COLAB` (tirada do endereço) e o filtro de canais e temas logo depois de carregar o `data.json`.
 - **Admin** (`READONLY = false`, `DATA_URL = "../data.json"`): adiciona o cartão "Publicar para os amigos" e os botões de publicação, toda a lógica de API do GitHub, a proteção de conflito e o `noindex`.
 
@@ -269,6 +270,7 @@ Se uma alteração em `base.html` mudar um trecho que o `build.py` procura, o bu
 14. Código-fonte e script de build guardados em `fonte/`, junto com este documento.
 15. Confirmação antes de marcar ou desmarcar o check ("Você é <colaborador>…?", com Sim e Não; Esc fecha).
 16. Página do colaborador: `canais.obunker.pro/<nome>` mostra só os canais dele (via `404.html`). Projeto passou a ser mantido no Claude (Cowork).
+17. Página principal trocada por um aviso; a agenda fica só nos endereços dos colaboradores e no admin.
 
 O artifact original dentro do Claude ("Agenda de Conteúdo") **não está ligado a este site** e ficou desatualizado. Use o site.
 

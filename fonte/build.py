@@ -234,8 +234,42 @@ boot();'''
     s=re.sub(r'const SEED_POSTS=.*?;\nconst SEED_CH=.*?;\n','',s,count=1,flags=re.S)
     return s
 
+def aviso():
+    """Página principal: só um aviso. A agenda fica nos endereços dos colaboradores (/<nome>) e no /admin123."""
+    icon=re.search(r'<link rel="icon"[^>]*>',build(True)).group(0)
+    return '''<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Agenda de Conteúdo</title>
+'''+icon+'''
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700&family=Figtree:wght@400;500&display=swap">
+<style>
+:root{--bg:#F3F4F7;--surface:#FFFFFF;--line:#DCDFE7;--fg:#171A22;--muted:#666C7C;--now:#2F7FD6}
+@media (prefers-color-scheme: dark){:root{--bg:#12141A;--surface:#1B1E26;--line:#2E3342;--fg:#ECEEF3;--muted:#9298A8;--now:#5AA6F2}}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px 16px;background:var(--bg);color:var(--fg);font:400 16px/1.5 Figtree,system-ui,sans-serif}
+main{width:100%;max-width:440px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:32px 28px;text-align:center}
+svg{width:44px;height:44px;margin-bottom:14px}
+h1{margin:0 0 8px;font:700 26px/1.15 "Bricolage Grotesque",system-ui,sans-serif;letter-spacing:-.01em}
+p{margin:0;color:var(--muted)}
+</style>
+</head>
+<body>
+<main>
+  <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="var(--now)"/><rect x="7" y="9" width="18" height="16" rx="3" fill="none" stroke="#fff" stroke-width="2.5"/><path d="M7 14h18M12 6v5M20 6v5" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/></svg>
+  <h1>Agenda de Conteúdo</h1>
+  <p>Para ver a agenda dos seus canais, use o link que você recebeu do Bruno.</p>
+</main>
+</body>
+</html>
+'''
+
 os.makedirs(os.path.join(RAIZ,'admin123'),exist_ok=True)
-open(os.path.join(RAIZ,'index.html'),'w',encoding='utf-8').write(build(True))
+open(os.path.join(RAIZ,'index.html'),'w',encoding='utf-8').write(aviso())
 open(os.path.join(RAIZ,'admin123','index.html'),'w',encoding='utf-8').write(build(False))
 open(os.path.join(RAIZ,'404.html'),'w',encoding='utf-8').write(build(True,colab=True))
 print('Gerados: index.html, admin123/index.html e 404.html (página do colaborador)')
