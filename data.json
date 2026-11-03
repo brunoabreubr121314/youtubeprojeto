@@ -31,6 +31,14 @@
       "link": "https://www.youtube.com/@YTWealthMind",
       "cor": "rosa",
       "ordem": 6
+    },
+    {
+      "id": "cmw0ptnz6j0s",
+      "nome": "Clubinho do céu",
+      "colab": "Johnson",
+      "link": "",
+      "cor": "vermelho",
+      "ordem": 7
     }
   ],
   "posts": [
@@ -195,5 +203,5 @@
       "criado": 1793366755026
     }
   ],
-  "atualizado": "2026-10-30T21:36:24.823Z"
+  "atualizado": "2026-11-03T13:20:21.779Z"
 }
